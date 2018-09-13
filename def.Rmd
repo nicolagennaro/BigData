@@ -1,0 +1,515 @@
+---
+title: "MovieLens Dataset"
+author: Nicola Gennaro
+date: September 1, 2018
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+
+
+## MovieLens Dataset
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+setwd("/home/nicola/DSSC/Database/project/MovieLens/")
+
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(knitr)
+library(kableExtra)
+library(cowplot)
+
+options(knitr.table.format = "html")
+```
+
+<b>MovieLens</b> is a web-based recommender system and virtual community that recommends movies for its users to watch, based on their film preferences using collaborative filtering of members' movie ratings and movie reviews.
+
+The dataset contains:
+
+- over 1.000.000 ratings 
+- from more than 6.000 users
+- about 4.000 movies
+
+It's divided in three datasets: Users, Movies, Ratings
+
+
+
+
+
+## Users Dataset
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+users <- read.csv("dataset/users.csv")
+users$age <- factor(users$age, levels = c("Under 18", "18-24", "25-34", "35-44", "45-49", "50-55", "56+"))
+levels(users$age) <- c("<18", "18-24", "25-34", "35-44", "45-49", "50-55", "56+")
+```
+
+
+```{r}
+users[1:10,] %>% kable(align = "c") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 15, full_width = F)
+```
+
+
+
+## Male-Female Users
+
+Male Proportion: 0.717
+
+```{r}
+ggplot(data=users) + 
+  geom_bar(mapping = aes(x=gender, fill=gender)) +
+  xlab("Gender") +
+  ylab("Count") +
+  labs(title="Gender Counts")
+```
+
+
+
+## Users' Ages
+
+The age is divided in 7 categories:
+
+```{r}
+ggplot(data=users) + 
+  geom_bar(mapping = aes(x=age, fill=age)) +
+  xlab("Age") +
+  ylab("Count") +
+  labs(title="Age Counts")
+```
+
+
+
+## Occupations
+
+There are 20 diferent occupations
+
+```{r}
+ggplot(data=users) + 
+  geom_bar(mapping = aes(x=occupation, fill=gender)) +
+  xlab("Occupation") +
+  ylab("Count") +
+  labs(title="Occupation Counts MF") +
+  coord_flip() 
+```
+
+
+## Occupation-Gender Proportions
+
+```{r, echo=FALSE}
+fm <- sum(users$gender == "M")/length(users$gender)
+```
+
+```{r}
+ggplot(data=users) + 
+  geom_bar(mapping = aes(x=occupation, fill=gender), position="fill") +
+  geom_hline(aes(yintercept=fm)) + 
+  xlab("Occupation") +
+  ylab("Count") +
+  labs(title="Occupation Proportion") +
+  coord_flip()
+```
+
+
+## Occupation-Age Proportions
+
+```{r}
+ggplot(data=users) + 
+  geom_bar(mapping = aes(x=occupation, fill=age), position="fill") +
+  xlab("Occupation") +
+  ylab("Count") +
+  labs(title="Occupation Proportion") +
+  coord_flip()
+```
+
+
+
+
+<!-- ZIP -->
+
+## ZipCode Dataset
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+zip <- read.csv("dataset/zip.csv")
+
+zip1 <- zip[ c("Zipcode", "City", "State", "Lat", "Long", "Country") ]
+colnames(zip1) <- c("zipCode", "city", "state", "lat", "long", "country")
+zip1 <- zip1[ !duplicated(zip1$zipCode), ]
+
+use.zip <- inner_join(users, zip1, by="zipCode" )
+
+us.user <- use.zip[ use.zip$lat > 24 &  use.zip$lat < 50, ]
+us.user <- us.user[ complete.cases(us.user), ]
+
+states <- c("CA", "MN", "TX", "NY")
+
+new_states <- rep("other", dim(us.user)[1])
+
+for( s in states){
+  new_states[ us.user$state == s ] <- s
+}
+
+new_states <- factor(new_states, levels = c(states, "other"))
+
+states_colors <- c("CA" = "yellow", "MN" = "red", "TX" = "blue", "NY" = "green",   "other" = "black")
+
+states_df <- us.user[ us.user$state %in% states, ]
+```
+
+```{r}
+ggplot(data=us.user) +
+  geom_point(mapping = aes(x = long, y = lat, color = new_states)) + coord_fixed(ratio=1.5) +
+  xlab("") +
+  ylab("") +
+  labs(title="USA users") +
+  theme_bw() +
+  scale_color_manual(values = states_colors)
+```
+
+
+
+## States Analysis
+
+
+```{r}
+p1 <- ggplot(data=states_df) + 
+  geom_bar(mapping = aes(x=state, fill=state)) +
+  xlab("State") +
+  ylab("") +
+  theme_bw() +
+  labs(title="State Users") +
+  scale_fill_manual(values = states_colors)
+
+p2 <- ggplot(data=states_df) + 
+  geom_bar(mapping = aes(x=occupation, fill=state), position="fill") +
+  xlab("Occupation") +
+  ylab("") +
+  theme_bw() +
+  labs(title="State Occupations Proportions") +
+  scale_fill_manual(values = states_colors) +
+  coord_flip()
+
+
+plot_grid(p1, p2, align="o", ncol=2, rel_widths = c(1/3, 2/3))
+```
+
+
+
+
+## Movies Dataset
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+movies <- read.csv("dataset/movies.csv")
+movies <- movies[ complete.cases(movies), ]
+```
+
+```{r}
+movies[1:10, c(1,2,3,5,6,7)] %>% kable(align = "c") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 15, full_width = F)
+```
+
+
+## Movies Years
+
+```{r}
+ggplot(data=movies) + 
+  geom_bar(mapping=aes(x=year)) +
+  xlab("Year") +
+  ylab("Count") +
+  labs(title="Movies Year Counts")
+```
+
+## Movies Genres
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+summ <- colSums(movies[, 5:22])
+summdf <- data.frame(summ)
+summdf$genre <- names(summ)
+```
+
+```{r}
+ggplot(data=summdf) + 
+  geom_bar(mapping = aes(x=genre, y=summ), stat="identity") +
+  xlab("Genre") +
+  ylab("Count") +
+  labs(title="Movies Genres Counts") +
+  coord_flip()
+```
+
+
+
+## Ratings Dataset
+
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ratings <- read.csv("dataset/ratings.csv")
+```
+
+
+```{r}
+ratings[1:10, ] %>% kable(align = "c") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 15, full_width = F)
+```
+
+
+## Ratings
+
+People tend to see and rate movies they like
+
+```{r}
+ratings$Rating <- factor(ratings$rating, levels = c(1,2,3,4,5))
+
+p1 <- ggplot(data=ratings) + 
+  geom_bar(mapping = aes(x=Rating, fill=Rating)) +
+  xlab("Rating") +
+  ylab("Count") +
+  labs(title="Ratings Counts")
+
+ratings$Rating <- NULL
+
+p2 <- ggplot(data=ratings, aes(x="", y=rating)) +
+  stat_summary(fun.data="mean_sdl", fun.args = list(mult=1), geom="crossbar", width=0.5)+ coord_fixed(ratio=2.5) + xlab("Rating") + ylab("Mean") +
+  labs(title="Mean Rating")
+
+?plot_grid
+plot_grid(p1, p2, align="o", ncol=2, rel_widths = c(2/3, 1/3))
+#grid.arrange(p1, p2, ncol=2)
+```
+
+
+## Male-Female Ratings
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+rat.use <- inner_join(ratings, users, by="userID")
+fm.rat <- sum(rat.use$gender == "M")/length(rat.use$gender)
+```
+
+```{r}
+ggplot(data=rat.use) + 
+  geom_bar(mapping = aes(x=rating, fill=gender), position="fill") +
+  geom_hline(aes(yintercept=fm.rat), linetype=3) +
+  geom_hline(aes(yintercept=fm)) +
+  xlab("Rating") +
+  ylab("MF Proportion") +
+  labs(title="Ratings Counts M-F")
+```
+
+
+
+## Age Ratings
+
+Older people's ratings are higher then younger ones...
+
+```{r}
+ggplot(data=rat.use) + 
+  theme_bw() + 
+  geom_bar(mapping = aes(x=rating, fill=age), position="fill") +
+  xlab("Rating") +
+  ylab("Age Proportion") +
+  labs(title="Ratings Counts Age")
+```
+
+
+## Age - Year
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+rat.use.year <- inner_join(rat.use, movies, by="movieID")
+```
+
+
+```{r}
+ggplot(data=rat.use.year, mapping = aes(x = age, y = year, color=age)) +
+  geom_boxplot() +
+  xlab("Age") +
+  ylab("Year") +
+  labs(title="Mean year vs Age")
+```
+
+
+
+
+## Decade - Age
+
+The tendency of older people to give higher votes seems to extend to all decades.
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+decade <- function(x){
+  return(x %/% 10 * 10 )
+}
+
+rat.use.year <- rat.use.year %>% mutate(decade = decade(year))
+rat.use.year$decade <- factor(rat.use.year$decade, levels = c("1910", "1920", "1930", "1940", "1950", "1960", "1970", "1980", "1990", "2000"))
+```
+
+
+```{r}
+ggplot(data=rat.use.year, mapping = aes(x = age, y = rating)) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
+  stat_summary(fun.data="mean_sdl", fun.args = list(mult=1), geom="crossbar", width=0.5) + 
+  facet_grid(~decade) +
+  xlab("Age") +
+  ylab("Mean Rating") +
+  labs(title="Mean rating for each age and decade")
+```
+
+
+
+## Age - Decade
+
+But from this plot is clear that for all ages, older movies have a higher vote
+
+```{r}
+ggplot(data=rat.use.year, mapping = aes(x = decade, y = rating, col=decade)) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
+  stat_summary(fun.data="mean_sdl", fun.args = list(mult=1), geom="crossbar", width=0.5) + 
+  facet_grid(~age)
+```
+
+
+
+
+## Genre - Gender
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+create_df <- function(dataframe, extract, vec, genres){
+  mf <- data.frame()
+  for( v in vec ){
+    for( genre in genres ){
+      x <- extract(dataframe, v, genre)
+      y <- data.frame(v, genre, x[1], x[2])
+      mf <- rbind(mf, y)
+    }
+  }
+  return(mf)
+}
+
+genres <- c("Drama", "Comedy", "Action", "Horror", "Western", "Romance", "Children.s", "Musical", "War")
+```
+
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+genders <- c("F", "M")
+
+extract_sex <- function(dataframe, sex, genre){
+  df1 <- dataframe[ dataframe$gender == sex & dataframe[genre] == 1, "rating"]
+  return(c(mean(df1), sd(df1)))
+}
+
+m <- create_df(rat.use.year, extract_sex, genders, genres)
+colnames(m) <- c("gender", "genre", "mean", "sd")
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(m, aes(x=gender, y=mean, col=gender)) +
+  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
+  geom_line() +
+  geom_point() +
+  theme_bw() +
+  facet_grid(~genre) +
+  xlab("Gender") +
+  ylab("Mean Rating")
+```
+
+
+
+## Genre - Age
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+extract_age <- function(dataframe, age, genre){
+  df1 <- dataframe[ dataframe$age == age & dataframe[genre] == 1, "rating"]
+  return(c(mean(df1), sd(df1)))
+}
+
+ages <- c("<18", "18-24", "25-34", "35-44", "45-49", "50-55", "56+")
+
+m <- create_df(rat.use.year, extract_age, ages, genres)
+colnames(m) <- c("age", "genre", "mean", "sd")
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(m, aes(x=age, y=mean)) +
+  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
+  geom_line() +
+  geom_point() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
+  facet_grid(~genre) +
+  xlab("Age") +
+  ylab("Mean Rating")
+```
+
+
+## Genre - Occupation
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+jobs <- c("K-12 student", "scientist", "programmer", "lawyer", "artist", "retired")
+
+extract_job <- function(dataframe, job, genre){
+  df1 <- dataframe[ dataframe$occupation == job & dataframe[genre] == 1, "rating"]
+  return(c(mean(df1), sd(df1)))
+}
+
+m <- create_df(rat.use.year, extract_job, jobs, genres)
+colnames(m) <- c("occupation", "genre", "mean", "sd")
+```
+
+
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(m, aes(x=occupation, y=mean)) +
+  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
+  geom_line() +
+  geom_point() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
+  facet_grid(~genre) +
+  xlab("Gender") +
+  ylab("Mean Rating")
+```
+
+
+## Genre - State
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+df <- inner_join(ratings, use.zip, by="userID")
+df <- inner_join(movies, df, by="movieID")
+
+
+extract_state <- function(dataframe, state, genre){
+  df1 <- dataframe[ dataframe$state == state & dataframe[genre] == 1, "rating"]
+  return(c(mean(df1), sd(df1)))
+}
+
+m <- create_df(df, extract_state, states, genres)
+colnames(m) <- c("state", "genre", "mean", "sd")
+```
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(m, aes(x=state, y=mean)) +
+  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
+  geom_line() +
+  geom_point() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
+  facet_grid(~genre) +
+  xlab("State") +
+  ylab("Mean Rating")
+```
+
+
+
+
+## Conclusions
+
+It's hard to predict the taste of a user using only his/her generic data:
+
+- Age is slightly related to the year of seen movies
+- Gender is slightly related to the movie genre but only for some of them
+- Occupation and residence contain no information
