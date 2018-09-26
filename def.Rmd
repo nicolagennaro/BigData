@@ -1,7 +1,7 @@
 ---
 title: "MovieLens Dataset"
 author: Nicola Gennaro
-date: September 1, 2018
+date: September 2018
 output: ioslides_presentation
 ---
 
@@ -112,7 +112,7 @@ ggplot(data=users) +
   geom_hline(aes(yintercept=fm)) + 
   xlab("Occupation") +
   ylab("Count") +
-  labs(title="Occupation Proportion") +
+  labs(title="Occupation Proportion - Gender") +
   coord_flip()
 ```
 
@@ -123,8 +123,8 @@ ggplot(data=users) +
 ggplot(data=users) + 
   geom_bar(mapping = aes(x=occupation, fill=age), position="fill") +
   xlab("Occupation") +
-  ylab("Count") +
-  labs(title="Occupation Proportion") +
+  ylab("Proportion") +
+  labs(title="Occupation Proportion - Age") +
   coord_flip()
 ```
 
@@ -164,40 +164,39 @@ states_df <- us.user[ us.user$state %in% states, ]
 
 ```{r}
 ggplot(data=us.user) +
-  geom_point(mapping = aes(x = long, y = lat, color = new_states)) + coord_fixed(ratio=1.5) +
+  geom_point(mapping = aes(x = long, y = lat)) + coord_fixed(ratio=1.5) +
   xlab("") +
   ylab("") +
   labs(title="USA users") +
-  theme_bw() +
-  scale_color_manual(values = states_colors)
+  theme_bw()
 ```
 
 
 
-## States Analysis
+<!-- ## States Analysis -->
 
 
-```{r}
-p1 <- ggplot(data=states_df) + 
-  geom_bar(mapping = aes(x=state, fill=state)) +
-  xlab("State") +
-  ylab("") +
-  theme_bw() +
-  labs(title="State Users") +
-  scale_fill_manual(values = states_colors)
+<!-- ```{r} -->
+<!-- p1 <- ggplot(data=states_df) +  -->
+<!--   geom_bar(mapping = aes(x=state, fill=state)) + -->
+<!--   xlab("State") + -->
+<!--   ylab("") + -->
+<!--   theme_bw() + -->
+<!--   labs(title="State Users") + -->
+<!--   scale_fill_manual(values = states_colors) -->
 
-p2 <- ggplot(data=states_df) + 
-  geom_bar(mapping = aes(x=occupation, fill=state), position="fill") +
-  xlab("Occupation") +
-  ylab("") +
-  theme_bw() +
-  labs(title="State Occupations Proportions") +
-  scale_fill_manual(values = states_colors) +
-  coord_flip()
+<!-- p2 <- ggplot(data=states_df) +  -->
+<!--   geom_bar(mapping = aes(x=occupation, fill=state), position="fill") + -->
+<!--   xlab("Occupation") + -->
+<!--   ylab("") + -->
+<!--   theme_bw() + -->
+<!--   labs(title="State Occupations Proportions") + -->
+<!--   scale_fill_manual(values = states_colors) + -->
+<!--   coord_flip() -->
 
 
-plot_grid(p1, p2, align="o", ncol=2, rel_widths = c(1/3, 2/3))
-```
+<!-- plot_grid(p1, p2, align="o", ncol=2, rel_widths = c(1/3, 2/3)) -->
+<!-- ``` -->
 
 
 
@@ -348,13 +347,13 @@ rat.use.year$decade <- factor(rat.use.year$decade, levels = c("1910", "1920", "1
 
 
 ```{r}
-ggplot(data=rat.use.year, mapping = aes(x = age, y = rating)) + 
+ggplot(data=rat.use.year, mapping = aes(x = age, y = rating, col=age)) + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
   stat_summary(fun.data="mean_sdl", fun.args = list(mult=1), geom="crossbar", width=0.5) + 
   facet_grid(~decade) +
   xlab("Age") +
   ylab("Mean Rating") +
-  labs(title="Mean rating for each age and decade")
+  labs(title="Mean rating for each Age and Decade")
 ```
 
 
@@ -367,7 +366,10 @@ But from this plot is clear that for all ages, older movies have a higher vote
 ggplot(data=rat.use.year, mapping = aes(x = decade, y = rating, col=decade)) + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
   stat_summary(fun.data="mean_sdl", fun.args = list(mult=1), geom="crossbar", width=0.5) + 
-  facet_grid(~age)
+  facet_grid(~age) +
+  xlab("Decade") +
+  ylab("Mean Rating") +
+  labs(title="Mean rating for each Age and Decade")
 ```
 
 
@@ -413,7 +415,8 @@ ggplot(m, aes(x=gender, y=mean, col=gender)) +
   theme_bw() +
   facet_grid(~genre) +
   xlab("Gender") +
-  ylab("Mean Rating")
+  ylab("Mean Rating") +
+  labs(title="Mean rating vs Gender")
 ```
 
 
@@ -439,10 +442,11 @@ ggplot(m, aes(x=age, y=mean)) +
   geom_line() +
   geom_point() +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 6)) +
   facet_grid(~genre) +
   xlab("Age") +
-  ylab("Mean Rating")
+  ylab("Mean Rating") +
+  labs(title="Mean rating for each Age and Genre")
 ```
 
 
@@ -468,40 +472,41 @@ ggplot(m, aes(x=occupation, y=mean)) +
   geom_line() +
   geom_point() +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7)) +
   facet_grid(~genre) +
-  xlab("Gender") +
-  ylab("Mean Rating")
+  xlab("Occupation") +
+  ylab("Mean Rating") +
+  labs(title="Mean rating for each Occupation and Genre")
 ```
 
 
-## Genre - State
+<!-- ## Genre - State -->
 
-```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-df <- inner_join(ratings, use.zip, by="userID")
-df <- inner_join(movies, df, by="movieID")
+<!-- ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE} -->
+<!-- df <- inner_join(ratings, use.zip, by="userID") -->
+<!-- df <- inner_join(movies, df, by="movieID") -->
 
 
-extract_state <- function(dataframe, state, genre){
-  df1 <- dataframe[ dataframe$state == state & dataframe[genre] == 1, "rating"]
-  return(c(mean(df1), sd(df1)))
-}
+<!-- extract_state <- function(dataframe, state, genre){ -->
+<!--   df1 <- dataframe[ dataframe$state == state & dataframe[genre] == 1, "rating"] -->
+<!--   return(c(mean(df1), sd(df1))) -->
+<!-- } -->
 
-m <- create_df(df, extract_state, states, genres)
-colnames(m) <- c("state", "genre", "mean", "sd")
-```
+<!-- m <- create_df(df, extract_state, states, genres) -->
+<!-- colnames(m) <- c("state", "genre", "mean", "sd") -->
+<!-- ``` -->
 
-```{r, message=FALSE, warning=FALSE}
-ggplot(m, aes(x=state, y=mean)) +
-  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
-  geom_line() +
-  geom_point() +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
-  facet_grid(~genre) +
-  xlab("State") +
-  ylab("Mean Rating")
-```
+<!-- ```{r, message=FALSE, warning=FALSE} -->
+<!-- ggplot(m, aes(x=state, y=mean)) + -->
+<!--   geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) + -->
+<!--   geom_line() + -->
+<!--   geom_point() + -->
+<!--   theme_bw() + -->
+<!--   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) + -->
+<!--   facet_grid(~genre) + -->
+<!--   xlab("State") + -->
+<!--   ylab("Mean Rating") -->
+<!-- ``` -->
 
 
 
@@ -510,6 +515,7 @@ ggplot(m, aes(x=state, y=mean)) +
 
 It's hard to predict the taste of a user using only his/her generic data:
 
-- Age is slightly related to the year of seen movies
-- Gender is slightly related to the movie genre but only for some of them
-- Occupation and residence contain no information
+- Age is slightly related to the year of rated movies and older users tend to rate older movies.
+- In general older movies received higher votes, while older people give higher votes.
+- Gender is slightly related to the movies' genre but only for some of them (especially Musicals and Childrens' movies)
+- The occupation of a user contain no information about his/her tastes.

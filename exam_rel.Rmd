@@ -1,7 +1,7 @@
 ---
-title: "MovieLens Dataset"
+title: "The MovieLens Dataset"
 author: Nicola Gennaro
-date: September 1, 2018
+date: September 2018
 output: html_document
 ---
 
@@ -29,7 +29,7 @@ options(knitr.table.format = "html")
 <br>
 <br>
 
-## MovieLens Dataset
+## The MovieLens Dataset
 
 
 
@@ -41,15 +41,17 @@ The dataset contains:
 - from more than 6.000 users
 - about 4.000 movies
 
-The dataset is divided in three tables: Users, Movies, Ratings and contains 
+The dataset is divided in three tables: Users, Movies and Ratings. It contains 
 informations both about the users, like age, sex and occupation, and also about
 the movies, like genre and year of release. The rating system is based on the five
 stars classification, like many other datasets of this kind. In the first part of 
 this report we're going to explore and analyze the kind of data we are dealing with,
 while in the second part the attention will be focused on finding relationships
-between the users main features and their movies tastes. Let's start with the Users
-table first.
+between the users' main features and their movies tastes. Let's start with the Users
+table.
 
+<br>
+<br>
 
 
 ## The Users Dataset
@@ -70,7 +72,6 @@ users[1:5,] %>% kable(align = "c") %>%
   kable_styling(bootstrap_options = "striped", font_size = 15, full_width = F)
 ```
 
-
 Let's now explore a little bit these features starting with the gender:
 
 ```{r}
@@ -85,10 +86,11 @@ As clarified by this histogram there is a strong disproportion in the genders, m
 of 70% of users is a male, while one would expect them to be near 50%. Even if we can
 legitimately assume that males are simply more numerous because they are more likely to
 use this kind of service, we have to remember that in the case of a family generally is 
-the man to give the name for the account, while, after that, the whole family can use it.
-If this is the case, also the other data related to users, like age and occupation may be
-not wrong but at least not completely correct...
-This is a problem we cannot solve....
+the man who gives the name for the account, while, after that, the whole family can use it.
+If this is the case, the data related to users, like age and occupation may be
+wrong or at least not completely correct. This is a problem we cannot solve, and unfortunately
+our entire analysis will be based on this data.
+Another main feature of users in this database is age:
 
 ```{r}
 ggplot(data=users) + 
@@ -98,12 +100,11 @@ ggplot(data=users) +
   labs(title="Age Counts")
 ```
 
-As we can see ages are divided in 7 categories, ranging between under 18 and over 56. The 
 
-
-
-To each user is associated one of 20 possible occupation, with also the possibility of the "other" category, that
-seems to be the most numerous. 
+As we can see ages are divided in 7 categories, ranging between under 18 and over 56. The histogram above
+shows that the majority of users are young adults, expecially in the 25-34 range.
+To each user is associated one of 20 possible occupations, with also the possibility of the "other" category, that
+seems to be one of the most numerous. 
 
 
 ```{r}
@@ -114,6 +115,7 @@ ggplot(data=users) +
   labs(title="Occupation Counts MF") +
   coord_flip() 
 ```
+
 
 In the histogram the colors denote the gender of the user, but this is not very informative, since the proportion
 of males and females is not equal. To better understand how the gender is associated to a specific occupation, a 
@@ -130,16 +132,15 @@ ggplot(data=users) +
   geom_bar(mapping = aes(x=occupation, fill=gender), position="fill") +
   geom_hline(aes(yintercept=fm)) + 
   xlab("Occupation") +
-  ylab("Count") +
-  labs(title="Occupation Proportion") +
+  ylab("Proportion") +
+  labs(title="Occupation Proportion - Gender") +
   coord_flip()
 ```
 
+
 The most unbalanced profession is the homemaker, as was to be expected, but also in the clearical/admin and in the 
 medical field there is a notable disproportion in favour of women. Craftsman, technician, programmer and lawyer are
-instead more "male" jobs.
-
-
+instead more "male" jobs (according to these data).
 
 The following diagram, represent again the occupation proportion of the users, but this time the colors correspond
 to their ages.
@@ -148,8 +149,8 @@ to their ages.
 ggplot(data=users) + 
   geom_bar(mapping = aes(x=occupation, fill=age), position="fill") +
   xlab("Occupation") +
-  ylab("Count") +
-  labs(title="Occupation Proportion") +
+  ylab("Proportion") +
+  labs(title="Occupation Proportion - Age") +
   coord_flip()
 ```
 
@@ -158,12 +159,18 @@ one, that of course are strongly related to age. Also being an unemployed seems 
 expecially those in the 18-24 category dominates this class.
 
 
+<!-- ######################### -->
+
+
+<br>
+<br>
+
 ## Using ZipCode to track users' position
 
 Since MovieLens provides only the Zipcode of the users, I joined this dataset with one made available from
 the post service to have all the other informations that can be deduced from the postal address. In particular
-we have at our disposal the city, state and geographical coordinates of our users. It comes out that, with the 
-exception of five users, all of them comes from USA, in particular from the continent as we can see from the 
+we have at our disposal the city, state and geographical coordinates of our users. It comes out that, with the
+exception of five users, all of them comes from USA, and in particular from the continent, as we can see from the
 plot below, obtained with longitude and latitude of the accounts.
 
 
@@ -197,56 +204,61 @@ states_df <- us.user[ us.user$state %in% states, ]
 
 ```{r}
 ggplot(data=us.user) +
-  geom_point(mapping = aes(x = long, y = lat, color = new_states)) + coord_fixed(ratio=1.5) +
+  geom_point(mapping = aes(x = long, y = lat)) + coord_fixed(ratio=1.5) +
   xlab("") +
   ylab("") +
   labs(title="USA users") +
-  theme_bw() +
-  scale_color_manual(values = states_colors)
+  theme_bw()
 ```
 
 
-It is possible that, besides the aforementioned characteristic of users, also their belonging to a state has
-an impact on movie tastes. Since there are many states in the US, and for many of them the number of users is
-too low to be statistically significant, I decided to focus the attention on only four of them: California, NY State,
-Minnesota and Texas. I have choose these ones for two reasons, firstly because they are the most represented (higher
-number of users) but also because these states are somewhat different from each other, as one can see from the map
-they are in four different geographical regions but it is also well know that they traditionally have different
-political ideas and different life styles.
-The following plots depicts the number of users from the four states and the occupations proportions, this last one 
-shows that the 
+<!-- It is possible that, besides the aforementioned characteristic of users, also their belonging to a state has -->
+<!-- an impact on movie tastes. Since there are many states in the US, and for many of them the number of users is -->
+<!-- too low to be statistically significant, I decided to focus the attention on only four of them: California, NY State, -->
+<!-- Minnesota and Texas. I have choose these ones for two reasons, firstly because they are the most represented (higher -->
+<!-- number of users) but also because these states are somewhat different from each other, as one can see from the map -->
+<!-- they are in four different geographical regions but it is also well know that they traditionally have different -->
+<!-- political ideas and different life styles. -->
+<!-- The following plots depicts the number of users from the four states and the occupations proportions, this last one  -->
+<!-- shows that the  -->
 
 
-```{r}
-p1 <- ggplot(data=states_df) + 
-  geom_bar(mapping = aes(x=state, fill=state)) +
-  xlab("State") +
-  ylab("") +
-  theme_bw() +
-  labs(title="State Users") +
-  scale_fill_manual(values = states_colors)
+<!-- ```{r} -->
+<!-- p1 <- ggplot(data=states_df) +  -->
+<!--   geom_bar(mapping = aes(x=state, fill=state)) + -->
+<!--   xlab("State") + -->
+<!--   ylab("") + -->
+<!--   theme_bw() + -->
+<!--   labs(title="State Users") + -->
+<!--   scale_fill_manual(values = states_colors) -->
 
-p2 <- ggplot(data=states_df) + 
-  geom_bar(mapping = aes(x=occupation, fill=state), position="fill") +
-  xlab("Occupation") +
-  ylab("") +
-  theme_bw() +
-  labs(title="State Occupations Proportions") +
-  scale_fill_manual(values = states_colors) +
-  coord_flip()
-
-
-plot_grid(p1, p2, align="o", ncol=2, rel_widths = c(1/3, 2/3))
-```
+<!-- p2 <- ggplot(data=states_df) +  -->
+<!--   geom_bar(mapping = aes(x=occupation, fill=state), position="fill") + -->
+<!--   xlab("Occupation") + -->
+<!--   ylab("") + -->
+<!--   theme_bw() + -->
+<!--   labs(title="State Occupations Proportions") + -->
+<!--   scale_fill_manual(values = states_colors) + -->
+<!--   coord_flip() -->
 
 
+<!-- plot_grid(p1, p2, align="o", ncol=2, rel_widths = c(1/3, 2/3)) -->
+<!-- ``` -->
+
+
+
+<!-- ################################################## -->
+
+
+<br>
+<br>
 
 ## The Movies Dataset
 
 
 This second table contains informations like title, year and genres for each movie in the dataset. In particular
 since one movie can goes under more that one genre, these are one-hot encoded with zeros and ones. In the following
-we're briefly going to analyze this table and its content. 
+we're briefly going to analyze this table and its content.
 
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
@@ -255,13 +267,13 @@ movies <- movies[ complete.cases(movies), ]
 ```
 
 ```{r}
-movies[1:10, c(1,2,3,5,6,7)] %>% kable(align = "c") %>%
+movies[1:5, c(1,2,3,5,6,7)] %>% kable(align = "c") %>%
   kable_styling(bootstrap_options = "striped", font_size = 15, full_width = F)
 ```
 
 
 For example the histogram below show that, as expected, the majority of movies present in this dataset were 
-produced in the last years but also old movies are present.
+produced in the last years, but also old movies are present.
 
 ```{r}
 ggplot(data=movies) + 
@@ -272,12 +284,13 @@ ggplot(data=movies) +
 ```
 
 
-In this diagram below, instead, there is the number of genres appearing in the whole dataset. As mentioned before
-one movie can have more than one genre, so the sum of them all is higher than the number of movies in the dataset
-but the majority of movies has just one or two of them. Drama and Comedy are by far the most numerous genres 
+In the diagram below, instead, there are the number of genres appearing in the whole dataset. As mentioned before
+one movie can have more than one genre, so the sum of them all is higher than the number of movies in the dataset.
+Having more than one genre can be confusing for our purpouse of analysis but the truth is that the majority of movies 
+has just one or two of them, so it's not such a big deal. Drama and Comedy are by far the most numerous genres 
 followed by Action, Thriller and Romance. In the final analysis about the relationship between users' features and
-movies tastes I'm going to consider only a few of them, in particular I chose those that to me seemed to be the most
-
+movies tastes, I'm going to consider only a few of them, in particular I chose those that, according to me, seemed to 
+be the most likely to be associated to a particular users' class.
 
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
@@ -296,10 +309,13 @@ ggplot(data=summdf) +
 ```
 
 
+<br>
+<br>
+
 ## The ratings dataset
 
 
-The last part of the dataset regards the ratings given by the users, there are more than 1 million of them and
+The last part of the dataset regards the ratings given by the users. There are more than 1 million of them and
 the creators ensures that each users rated at least 20 items. This table contains only the ratings, in the five
 stars systems, and the timestamps of the rating. As done before, we're going to spend a few words also on this one.
 
@@ -307,7 +323,7 @@ stars systems, and the timestamps of the rating. As done before, we're going to 
 ratings <- read.csv("dataset/ratings.csv")
 ```
 ```{r}
-ratings[1:10, ] %>% kable(align = "c") %>%
+ratings[1:5, ] %>% kable(align = "c") %>%
   kable_styling(bootstrap_options = "striped", font_size = 15, full_width = F)
 ```
 
@@ -317,8 +333,9 @@ to three and four
 stars, and suggest that, as one can imagine, people tend to see, and thus rate, movies they know they will 
 probably like. 
 This is confirmed by the plot on the right, that simply shows the mean and the standard deviation of the ratings.
-The mean is a little bit higher than 3, that wuold have been the mean value in case of a uniform distribution 
-over the five stars, thus confirming the previous hypothesis. 
+The mean is a little bit higher than 3, that would have been the mean value in the case of a uniform distribution 
+over the five stars, thus confirming the previous hypothesis.
+
 
 ```{r}
 ratings$Rating <- factor(ratings$rating, levels = c(1,2,3,4,5))
@@ -362,18 +379,35 @@ ggplot(data=rat.use) +
   labs(title="Ratings Counts M-F")
 ```
 
+
 It's also interesting what happens if we plot the five ratings against the proportion for each age class as done in
 the plot below. The pattern shows that older users tend to give slightly higher votes than younger ones. One possible 
 explaination is that they probably know better what they like, but we're going to tell something about this fact in 
 the next chapter, when we're going to talk about the relationship between the year of a movie and the age of a user.
 
 
+```{r}
+ggplot(data=rat.use) + 
+  theme_bw() + 
+  geom_bar(mapping = aes(x=rating, fill=age), position="fill") +
+  xlab("Rating") +
+  ylab("Age Proportion") +
+  labs(title="Ratings Counts Age")
+```
+
+
+
+<br>
+<br>
+
 
 ## Final Analysis
 
 
-Now we're going to analize the possible relationship between the features of movies and those of users, to see if is 
-possible to predict a user taste just by his personal data. Just a few lines above we talked about the fact that older
+
+Now we're going to analize the possible relationship between the features of movies and those of users, to see if it is 
+possible to predict a user's taste only by using his personal data. 
+Just a few lines above we talked about the fact that older
 users tend to give higher votes, and we assumed that this is because they know their tastes. The following plot will
 tell us more about this. The next figure shows the mean year of movies rated by a particular age category, and it is
 pretty clear that the older the users are, the older are also the movies they have rated. So we can imagine that older
@@ -398,8 +432,8 @@ ggplot(data=rat.use.year, mapping = aes(x = age, y = year, color=age)) +
 
 To simplify the following analysis, we're going to divide the movies in decades instead of considering the single 
 years. Following the above reasoning we can expect that the mean rate for older movies should be higher for the 
-older class of people. But the following plot, that for each decade shows the mean rate for each age category, shows
-that this is only partially true.
+older class of people. But the following plot, that for each decade shows the mean rating for each age category together
+with its standard deviation, shows that this is only partially true.
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
 decade <- function(x){
@@ -412,23 +446,23 @@ rat.use.year$decade <- factor(rat.use.year$decade, levels = c("1910", "1920", "1
 
 
 ```{r}
-ggplot(data=rat.use.year, mapping = aes(x = age, y = rating)) + 
+ggplot(data=rat.use.year, mapping = aes(x = age, y = rating, col=age)) + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
   stat_summary(fun.data="mean_sdl", fun.args = list(mult=1), geom="crossbar", width=0.5) + 
   facet_grid(~decade) +
   xlab("Age") +
   ylab("Mean Rating") +
-  labs(title="Mean rating for each age and decade")
+  labs(title="Mean rating for each Age and Decade")
 ```
 
 
 As one can see the mean vote tend to be higher for older users, but this is true for each decade, and this is more
 evident especially in the last two decades, i.e. for the most recent movies. So the higher mean rating of older users
-is not due to the fact that they see old movies, but is a fact that extends itself to all kind of movies. The previous
+is not due to the fact that they see old movies, but is a fact that extends to all kind of movies. The previous
 hypothesis that explain the higher ratings with already seen movies is to be discarded. We can simply
-assume that older people tend to give better votes, but probably the fact that they know their tastes and know in
-anticipation what movie they will like is a better explaination.
-In the 20' categories, but particularly in the 10', the pattern is totally random but this is due to the small number
+assume that older people tend to give better votes, but probably the fact that they know their tastes, and know in
+advance what movie they will like, is a better explaination.
+In the 20' categories, but particularly in the 10', the pattern is totally random, but this is due to the small number
 of movies in these classes.
 This plot shows also another pattern that is worthy to be analized, the overall mean rating tend to decrease with the
 decade of the movies. We can now plot the same features but in a different perspective: in this plot the mean ratings
@@ -440,19 +474,24 @@ are grouped by age instead of decade.
 ggplot(data=rat.use.year, mapping = aes(x = decade, y = rating, col=decade)) + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
   stat_summary(fun.data="mean_sdl", fun.args = list(mult=1), geom="crossbar", width=0.5) + 
-  facet_grid(~age)
+  facet_grid(~age) +
+  xlab("Decade") +
+  ylab("Mean Rating") +
+  labs(title="Mean rating for each Age and Decade")
 ```
 
 
-So it seems that older movies are more appreciated by all kind of users, regardless of age. Maybe this reasoning needs 
-a little bit of recap...
+So it seems that older movies are more appreciated by all kind of users, regardless of age. Maybe this last reasoning
+needs a little bit of recap: what the data are telling us is that older movies, in general, are more appreciated by 
+people, because on the average they have the higher vote. But, when one looks at the mean for each single age class, 
+it is clear that older users give higher votes, indipendent of the movie year or decade.
 
-Now we're going to analize in deatail the relationship between the users features and genres, that is for sure a
-more important feature of a movie than the year of production.
+Now we're going to analize in deatail the relationship between the users features and movies genres, that is for 
+sure a more important feature for a movie than the year of production.
 Since there are a lot of genres, I decided to focus the attention only on a few of them, in particular those that
-to me seems to be more particular and, in my opinion,  more likely to be associated to one of the classes in 
+to me seems to be more particular, and, in my opinion, more likely to be associated to one of the classes in 
 which users are divided. These genres are: Drama, Comedy, Action, Horror, Western, Romance, Childrens', Musical and
-War.
+War. First we're going to analize the relationship between genre and sex:
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
 create_df <- function(dataframe, extract, vec, genres){
@@ -492,19 +531,21 @@ ggplot(m, aes(x=gender, y=mean, col=gender)) +
   theme_bw() +
   facet_grid(~genre) +
   xlab("Gender") +
-  ylab("Mean Rating")
+  ylab("Mean Rating") +
+  labs(title="Mean rating vs Gender")
 ```
 
-As we can see, ever if there are some differences, these are not so significant. But for example western movies are 
-preferred by male users, while Musical, Romance and childrens' movies are preferred by women. All the most common genres
+As we can see, ever if there are some differences, these are not so significant. But for example Western movies are 
+preferred by male users, while Musical, Romance and Childrens' movies are preferred by women. All the most common genres
 like Drama and Comedy instead doesn't show a particular preference by one of the two genders. Surprisingly even genres
-like Action and War shows no difference, and the mean ratings are the same.
+like Action and War shows no difference, in fact the two mean ratings are the same.
 
 
 Again we can analize if there are some diffences between ages in their relationship with the movies' genres but the 
-plot below shows the same pattern we have encountered before, showing that in general the mean rating increase with
+plot below displays the same pattern we have encountered above, showing that in general the mean rating increase with
 age, indipendently of the genre. Only for Horror movies the mean rating is stable within the ages groups and this is
-also lower than the other genres. People do not like horrors.
+also lower than the other genres. So, in general, people do not like horrors.
+
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
 extract_age <- function(dataframe, age, genre){
@@ -525,18 +566,24 @@ ggplot(m, aes(x=age, y=mean)) +
   geom_line() +
   geom_point() +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 6)) +
   facet_grid(~genre) +
   xlab("Age") +
-  ylab("Mean Rating")
+  ylab("Mean Rating") +
+  labs(title="Mean rating for each Age and Genre")
 ```
 
-Finally we try to find some correlation with the genres and the other features discussed before like the occupation
-and the state. For the first one, again I decided to show the results only for a subset of all the possible occupations,
-showing those that seemed more likely to yield better results. But the results are negative also in this case.
-The occupations are not related to the genres, the only two occupations that show a pattern are the K-12 students and 
-the Retired but as discussed above these are strongly related to age, so the previous reasoning applies in this case,
-and there is nothing new in this analysis.
+
+
+Finally let's try to find some correlation with the genres and the users' jobs. 
+Again I decided to show the results only for a subset of all the possible occupations,
+showing those that seemed more likely to yield better outcomes. But the results are negative also in this case, and
+there is no clear relationship between occupations and genres. The only two classes that show a pattern are the 
+K-12 students, that always has lower ratings, and the Retired, that on the contrary has always an higher rating. 
+But as discussed above these are strongly related to age, so the previous reasoning applies in this case,
+and there is really nothing new in this analysis.
+
+
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
 jobs <- c("K-12 student", "scientist", "programmer", "lawyer", "artist", "retired")
@@ -558,48 +605,81 @@ ggplot(m, aes(x=occupation, y=mean)) +
   geom_line() +
   geom_point() +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7)) +
   facet_grid(~genre) +
-  xlab("Gender") +
-  ylab("Mean Rating")
+  xlab("Occupation") +
+  ylab("Mean Rating") +
+  labs(title="Mean rating for each Occupation and Genre")
 ```
 
 
-Also for the states, even if before they are very differnt, there are no particular differences in the ratings, the
-means are again all the same.
+<!-- ```{r, message=FALSE, warning=FALSE} -->
+<!-- ggplot(m, aes(x=occupation, y=mean)) + -->
+<!--   geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) + -->
+<!--   geom_line() + -->
+<!--   geom_point() + -->
+<!--   theme_bw() + -->
+<!--   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) + -->
+<!--   facet_grid(~genre) + -->
+<!--   xlab("Gender") + -->
+<!--   ylab("Mean Rating") -->
+<!-- ``` -->
 
 
-```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-df <- inner_join(ratings, use.zip, by="userID")
-df <- inner_join(movies, df, by="movieID")
+<!-- Also for the states, even if before they are very differnt, there are no particular differences in the ratings, the -->
+<!-- means are again all the same. -->
 
 
-extract_state <- function(dataframe, state, genre){
-  df1 <- dataframe[ dataframe$state == state & dataframe[genre] == 1, "rating"]
-  return(c(mean(df1), sd(df1)))
-}
+<!-- ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE} -->
+<!-- df <- inner_join(ratings, use.zip, by="userID") -->
+<!-- df <- inner_join(movies, df, by="movieID") -->
 
-m <- create_df(df, extract_state, states, genres)
-colnames(m) <- c("state", "genre", "mean", "sd")
-```
 
-```{r, message=FALSE, warning=FALSE}
-ggplot(m, aes(x=state, y=mean)) +
-  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
-  geom_line() +
-  geom_point() +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) +
-  facet_grid(~genre) +
-  xlab("State") +
-  ylab("Mean Rating")
-```
+<!-- extract_state <- function(dataframe, state, genre){ -->
+<!--   df1 <- dataframe[ dataframe$state == state & dataframe[genre] == 1, "rating"] -->
+<!--   return(c(mean(df1), sd(df1))) -->
+<!-- } -->
+
+<!-- m <- create_df(df, extract_state, states, genres) -->
+<!-- colnames(m) <- c("state", "genre", "mean", "sd") -->
+<!-- ``` -->
+
+<!-- ```{r, message=FALSE, warning=FALSE} -->
+<!-- ggplot(m, aes(x=state, y=mean)) + -->
+<!--   geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) + -->
+<!--   geom_line() + -->
+<!--   geom_point() + -->
+<!--   theme_bw() + -->
+<!--   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) + -->
+<!--   facet_grid(~genre) + -->
+<!--   xlab("State") + -->
+<!--   ylab("Mean Rating") -->
+<!-- ``` -->
+
+
+<br>
+<br>
+
 
 ## Conclusions
 
-In this report we have analyzed the MovieLens dataset and the kind of informations it can provide, then we tried to 
-use these informations to analyze the users' tastes and their movies preferences but little can be said about them.
-It seems that sex, gender, profession and geographical position are only slightly related to movie's preferences.
+In this report we have analyzed the MovieLens dataset and the kind of informations it can provide, and then we tried to 
+use these informations to analyze the users' tastes and their movies preferences, but, in the end, little can be 
+said about them. Let's resume our results:
+
+- Age is slightly related to the year of rated movies and older users tend to rate older movies.
+- In general older movies received higher votes, while older people give higher votes.
+- Gender is slightly related to the movies' genre but only for some of them (especially Musicals and Childrens' movies)
+- The occupation of a user contain no information about his/her tastes.
+
+So, at the end, it seems that general informations about the users, like sex, gender and profession, are only 
+slightly related to movies' preferences. We mentioned the fact that the data may be fuzzy, because the accounts can be
+used by more than one person at the time, and maybe this is one of the reasons why our analysis seems to yield so
+negative results. But after having said that, we have to remember that services like MovieLens or Netflix use some much 
+more sophisticate approaches for their reccomendations, like Collaborative Filtering (suggesting items consumed by
+users that are "similar" to the one in consideration) or Content-Based Filtering 
+(suggesting items similar to those already consumed by a user). Probably this is because they already know that nothing
+useful can be extracted by general informations about users.
 
 
 
