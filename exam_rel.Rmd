@@ -540,7 +540,44 @@ preferred by male users, while Musical, Romance and Childrens' movies are prefer
 like Drama and Comedy instead doesn't show a particular preference by one of the two genders. Surprisingly even genres
 like Action and War shows no difference, in fact the two mean ratings are the same.
 
+Maybe instead of considering the mean vote as measure it is convenient to look also at the number (or better the
+proportion) of movies seen by a particular gender, of course in function of the movie genre.
 
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+extract_count <- function(gender, genre){
+  x <- count(rat.use.year[ rat.use.year$gender == gender & rat.use.year[genre] == 1, ])
+  return(x)
+}
+
+d <- data.frame()
+for( gender in genders){
+  for( genre in genres){
+    n <- extract_count(gender, genre)
+    y <- data.frame(gender, genre, n)
+    d <- rbind(d, y)
+  }
+}
+
+colnames(d) <- c("gender", "genre", "nn")
+
+
+fm.rat <- sum(rat.use$gender == "M")/length(rat.use$gender)
+```
+
+```{r}
+ggplot(data=d, aes(x=genre)) + 
+  geom_col(aes( y=nn, fill=gender ), position="fill") + 
+  geom_hline(aes(yintercept=fm.rat)) + 
+  xlab("Movie Genre") +
+  ylab("Proportion") +
+  labs(title="Ratings Counts - Gender")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 9))
+```
+
+As one can see, in the proportion there is in fact a remarkable difference between men and women. In fact now it's more
+evident, for example, that female have watched more Romance and Musical movie, while male more Action, Horror, Western and War
+Movies. Strangely the mean rating seems to carry not so much informations about the kind of movie a particular user will
+watch.
 Again we can analize if there are some diffences between ages in their relationship with the movies' genres but the 
 plot below displays the same pattern we have encountered above, showing that in general the mean rating increase with
 age, indipendently of the genre. Only for Horror movies the mean rating is stable within the ages groups and this is
@@ -573,7 +610,38 @@ ggplot(m, aes(x=age, y=mean)) +
   labs(title="Mean rating for each Age and Genre")
 ```
 
+Let's also see the proportion of counts for each age category:
 
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+extract_count <- function(age, genre){
+  x <- count(rat.use.year[ rat.use.year$age == age & rat.use.year[genre] == 1, ])
+  return(x)
+}
+
+d <- data.frame()
+for( age in ages){
+  for( genre in genres){
+    n <- extract_count(age, genre)
+    y <- data.frame(age, genre, n)
+    d <- rbind(d, y)
+  }
+}
+
+colnames(d) <- c("age", "genre", "nn")
+```
+
+```{r}
+ggplot(data=d, aes(x=genre)) + 
+  geom_col(aes( y=nn, fill=age ), position="fill") + 
+  xlab("Movie Genre") +
+  ylab("Proportion") +
+  labs(title="Ratings Counts - Age")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 9))
+```
+
+Again the proportion yields more difference that the mean vote. It appears that old people have watched in proportion more
+Westerns and War movies that the other users, while as expected the <18 category is the one that has seen more movies for
+children.
 
 Finally let's try to find some correlation with the genres and the users' jobs. 
 Again I decided to show the results only for a subset of all the possible occupations,
@@ -669,7 +737,8 @@ said about them. Let's resume our results:
 
 - Age is slightly related to the year of rated movies and older users tend to rate older movies.
 - In general older movies received higher votes, while older people give higher votes.
-- Gender is slightly related to the movies' genre but only for some of them (especially Musicals and Childrens' movies)
+- According to the mean rating, gender is slightly related to the movies' genre but only for some of them 
+(especially Musicals and Childrens' movies), but, looking at the count of seen movies, a pattern is present.
 - The occupation of a user contain no information about his/her tastes.
 
 So, at the end, it seems that general informations about the users, like sex, gender and profession, are only 

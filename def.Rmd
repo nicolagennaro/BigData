@@ -15,7 +15,6 @@ knitr::opts_chunk$set(cache=TRUE)
 ## MovieLens Dataset
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-setwd("/home/nicola/DSSC/Database/project/MovieLens/")
 
 library(tidyverse)
 library(dplyr)
@@ -45,7 +44,7 @@ It's divided in three datasets: Users, Movies, Ratings
 ## Users Dataset
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-users <- read.csv("dataset/users.csv")
+users <- read.csv("/home/nicola/DSSC/Database/project/MovieLens/dataset/users.csv")
 users$age <- factor(users$age, levels = c("Under 18", "18-24", "25-34", "35-44", "45-49", "50-55", "56+"))
 levels(users$age) <- c("<18", "18-24", "25-34", "35-44", "45-49", "50-55", "56+")
 ```
@@ -136,7 +135,7 @@ ggplot(data=users) +
 ## ZipCode Dataset
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-zip <- read.csv("dataset/zip.csv")
+zip <- read.csv("/home/nicola/DSSC/Database/project/MovieLens/dataset/zip.csv")
 
 zip1 <- zip[ c("Zipcode", "City", "State", "Lat", "Long", "Country") ]
 colnames(zip1) <- c("zipCode", "city", "state", "lat", "long", "country")
@@ -204,7 +203,7 @@ ggplot(data=us.user) +
 ## Movies Dataset
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-movies <- read.csv("dataset/movies.csv")
+movies <- read.csv("/home/nicola/DSSC/Database/project/MovieLens/dataset/movies.csv")
 movies <- movies[ complete.cases(movies), ]
 ```
 
@@ -247,7 +246,7 @@ ggplot(data=summdf) +
 
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-ratings <- read.csv("dataset/ratings.csv")
+ratings <- read.csv("/home/nicola/DSSC/Database/project/MovieLens/dataset/ratings.csv")
 ```
 
 
@@ -419,6 +418,40 @@ ggplot(m, aes(x=gender, y=mean, col=gender)) +
   labs(title="Mean rating vs Gender")
 ```
 
+## Genre - Gender
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+extract_count <- function(gender, genre){
+  x <- count(rat.use.year[ rat.use.year$gender == gender & rat.use.year[genre] == 1, ])
+  return(x)
+}
+
+d <- data.frame()
+for( gender in genders){
+  for( genre in genres){
+    n <- extract_count(gender, genre)
+    y <- data.frame(gender, genre, n)
+    d <- rbind(d, y)
+  }
+}
+
+colnames(d) <- c("gender", "genre", "nn")
+
+
+fm.rat <- sum(rat.use$gender == "M")/length(rat.use$gender)
+```
+
+```{r}
+ggplot(data=d, aes(x=genre)) + 
+  geom_col(aes( y=nn, fill=gender ), position="fill") + 
+  geom_hline(aes(yintercept=fm.rat)) + 
+  xlab("Movie Genre") +
+  ylab("Proportion") +
+  labs(title="Ratings Counts - Gender")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 9))
+```
+
+
 
 
 ## Genre - Age
@@ -449,6 +482,39 @@ ggplot(m, aes(x=age, y=mean)) +
   labs(title="Mean rating for each Age and Genre")
 ```
 
+
+## Genre - Age
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+extract_count <- function(age, genre){
+  x <- count(rat.use.year[ rat.use.year$age == age & rat.use.year[genre] == 1, ])
+  return(x)
+}
+
+d <- data.frame()
+for( age in ages){
+  for( genre in genres){
+    n <- extract_count(age, genre)
+    y <- data.frame(age, genre, n)
+    d <- rbind(d, y)
+  }
+}
+
+colnames(d) <- c("age", "genre", "nn")
+```
+
+```{r}
+ggplot(data=d, aes(x=genre)) + 
+  geom_col(aes( y=nn, fill=age ), position="fill") + 
+  xlab("Movie Genre") +
+  ylab("Proportion") +
+  labs(title="Ratings Counts - Age")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 9))
+```
+
+
+
+<!-- ############################## -->
 
 ## Genre - Occupation
 
