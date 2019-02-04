@@ -43,8 +43,9 @@ The dataset contains:
 
 The dataset is divided in three tables: Users, Movies and Ratings. It contains 
 informations both about the users, like age, sex and occupation, and also about
-the movies, like genre and year of release. The rating system is based on the five
-stars classification, like many other datasets of this kind. In the first part of 
+the movies, like genre and year of release. The rating system is based on the five stars classification, like many other datasets of this kind. 
+
+In the first part of 
 this report we're going to explore and analyze the kind of data we are dealing with,
 while in the second part the attention will be focused on finding relationships
 between the users' main features and their movies tastes. Let's start with the Users
@@ -90,6 +91,7 @@ the man who gives the name for the account, while, after that, the whole family 
 If this is the case, the data related to users, like age and occupation may be
 wrong or at least not completely correct. This is a problem we cannot solve, and unfortunately
 our entire analysis will be based on this data.
+
 Another main feature of users in this database is age:
 
 ```{r}
@@ -103,6 +105,7 @@ ggplot(data=users) +
 
 As we can see ages are divided in 7 categories, ranging between under 18 and over 56. The histogram above
 shows that the majority of users are young adults, expecially in the 25-34 range.
+
 To each user is associated one of 20 possible occupations, with also the possibility of the "other" category, that
 seems to be one of the most numerous. 
 
@@ -168,9 +171,10 @@ expecially those in the 18-24 category dominates this class.
 ## Using ZipCode to track users' position
 
 Since MovieLens provides only the Zipcode of the users, I joined this dataset with one made available from
-the post service to have all the other informations that can be deduced from the postal address. In particular
+the post service, in order to have all the other informations that can be deduced from the postal address. 
+In particular
 we have at our disposal the city, state and geographical coordinates of our users. It comes out that, with the
-exception of five users, all of them comes from USA, and in particular from the continent, as we can see from the
+exception of five users, all of them live in USA, and in particular from the continent, as we can see from the
 plot below, obtained with longitude and latitude of the accounts.
 
 
@@ -286,7 +290,7 @@ ggplot(data=movies) +
 
 In the diagram below, instead, there are the number of genres appearing in the whole dataset. As mentioned before
 one movie can have more than one genre, so the sum of them all is higher than the number of movies in the dataset.
-Having more than one genre can be confusing for our purpouse of analysis but the truth is that the majority of movies 
+Having more than one genre can be confusing for our purpouse of analysis, but the truth is that the majority of movies 
 has just one or two of them, so it's not such a big deal. Drama and Comedy are by far the most numerous genres 
 followed by Action, Thriller and Romance. In the final analysis about the relationship between users' features and
 movies tastes, I'm going to consider only a few of them, in particular I chose those that, according to me, seemed to 
@@ -333,7 +337,7 @@ to three and four
 stars, and suggest that, as one can imagine, people tend to see, and thus rate, movies they know they will 
 probably like. 
 This is confirmed by the plot on the right, that simply shows the mean and the standard deviation of the ratings.
-The mean is a little bit higher than 3, that would have been the mean value in the case of a uniform distribution 
+The mean is higher than 3, that would have been the mean value in the case of a uniform distribution 
 over the five stars, thus confirming the previous hypothesis.
 
 
@@ -380,8 +384,8 @@ ggplot(data=rat.use) +
 ```
 
 
-It's also interesting what happens if we plot the five ratings against the proportion for each age class as done in
-the plot below. The pattern shows that older users tend to give slightly higher votes than younger ones. One possible 
+It's also interesting what happens if we plot the five ratings against the proportion for each age class. 
+The pattern shows that older users tend to give slightly higher votes than younger ones. One possible 
 explaination is that they probably know better what they like, but we're going to tell something about this fact in 
 the next chapter, when we're going to talk about the relationship between the year of a movie and the age of a user.
 
@@ -489,7 +493,7 @@ it is clear that older users give higher votes, indipendent of the movie year or
 Now we're going to analize in deatail the relationship between the users features and movies genres, that is for 
 sure a more important feature for a movie than the year of production.
 Since there are a lot of genres, I decided to focus the attention only on a few of them, in particular those that
-to me seems to be more particular, and, in my opinion, more likely to be associated to one of the classes in 
+to me seems to be more peculiar, and, in my opinion, more likely to be associated to one of the classes in 
 which users are divided. These genres are: Drama, Comedy, Action, Horror, Western, Romance, Childrens', Musical and
 War. First we're going to analize the relationship between genre and sex:
 
@@ -611,50 +615,6 @@ ggplot(m, aes(x=occupation, y=mean)) +
   ylab("Mean Rating") +
   labs(title="Mean rating for each Occupation and Genre")
 ```
-
-
-<!-- ```{r, message=FALSE, warning=FALSE} -->
-<!-- ggplot(m, aes(x=occupation, y=mean)) + -->
-<!--   geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) + -->
-<!--   geom_line() + -->
-<!--   geom_point() + -->
-<!--   theme_bw() + -->
-<!--   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) + -->
-<!--   facet_grid(~genre) + -->
-<!--   xlab("Gender") + -->
-<!--   ylab("Mean Rating") -->
-<!-- ``` -->
-
-
-<!-- Also for the states, even if before they are very differnt, there are no particular differences in the ratings, the -->
-<!-- means are again all the same. -->
-
-
-<!-- ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE} -->
-<!-- df <- inner_join(ratings, use.zip, by="userID") -->
-<!-- df <- inner_join(movies, df, by="movieID") -->
-
-
-<!-- extract_state <- function(dataframe, state, genre){ -->
-<!--   df1 <- dataframe[ dataframe$state == state & dataframe[genre] == 1, "rating"] -->
-<!--   return(c(mean(df1), sd(df1))) -->
-<!-- } -->
-
-<!-- m <- create_df(df, extract_state, states, genres) -->
-<!-- colnames(m) <- c("state", "genre", "mean", "sd") -->
-<!-- ``` -->
-
-<!-- ```{r, message=FALSE, warning=FALSE} -->
-<!-- ggplot(m, aes(x=state, y=mean)) + -->
-<!--   geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) + -->
-<!--   geom_line() + -->
-<!--   geom_point() + -->
-<!--   theme_bw() + -->
-<!--   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5)) + -->
-<!--   facet_grid(~genre) + -->
-<!--   xlab("State") + -->
-<!--   ylab("Mean Rating") -->
-<!-- ``` -->
 
 
 <br>
